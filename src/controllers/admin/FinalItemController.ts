@@ -1,33 +1,36 @@
 import { NextFunction, Request, Response } from "express";
-import { IFinalProduct, FinalProduct } from "../../models/final-product";
+// import { IFinalProduct, FinalProduct } from "../../models/final-product";
+import { IFinalItem, FinalItem } from "../../models/final-item";
 import { ClientError } from "../../exceptions/clientError";
 import { Error } from "mongoose";
 import { processErrors } from "../../utils/errorProcessing";
 import { ResponseCodes } from "../../utils/constants";
 
-class FinalProductController {
-  static newFinalProduct = async (
+class FinalItemController {
+  static newFinalItem = async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     // Get parameters from the body
     const {
+      location_id,
+      building_id,
       service_id,
-      product_sub_service_id,
-      product_id,
-      manufacturer_id,
-      product_data,
+      sub_service_id,
+      item_id,
+      item_data,
     } = req.body;
-    let finalProduct;
+    let finalItem;
     try {
-      finalProduct = await FinalProduct.build({
+      finalItem = await FinalItem.build({
+        location_id,
+        building_id,
         service_id,
-        product_sub_service_id,
-        product_id,
-        manufacturer_id,
-        product_data,
-      } as IFinalProduct).save();
+        sub_service_id,
+        item_id,
+        item_data,
+      } as IFinalItem).save();
     } catch (e: any) {
       console.error(e);
       const error = e as Error.ValidationError;
@@ -42,4 +45,4 @@ class FinalProductController {
   };
 }
 
-export default FinalProductController;
+export default FinalItemController;

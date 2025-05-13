@@ -182,6 +182,16 @@ export const ResponseCodes = {
     message: "FInal Product created successfully",
   },
 
+  // Item response codes
+  ITEM_CREATED: { code: 5001, message: "Item created successfully" },
+  ITEM_LIST: { code: 5002, message: "Item list fetched successfully" },
+  ITEM_DETAILS: {
+    code: 5003,
+    message: "Item details fetched successfully",
+  },
+  ITEM_UPDATED: { code: 5004, message: "Item updated successfully" },
+  ITEM_DELETED: { code: 5005, message: "Item deleted successfully" },
+
   // Product response codes
   CALCULATION_RESULT: {
     code: 9001,

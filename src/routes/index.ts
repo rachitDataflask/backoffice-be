@@ -13,6 +13,9 @@ import action from "./admin/action";
 import product from "./admin/product";
 import manufacturer from "./admin/manufacturer";
 import finalDesign from "./admin/final-design";
+import item from "./admin/item";
+import finalProduct from "./admin/final-product";
+import finalItem from "./admin/final-item";
 
 import calculation from "./public/calculation";
 import { NotFoundError } from "../exceptions/notFoundError";
@@ -30,11 +33,14 @@ routes.use("/admin/rooms", room);
 routes.use("/admin/services", service);
 routes.use("/admin/sub-services", subService);
 routes.use("/admin/product-sub-services", productSubService);
+routes.use("/admin/final-products", finalProduct);
+routes.use("/admin/final-items", finalItem);
 
 routes.use("/admin/actions", action);
 routes.use("/admin/products", product);
 routes.use("/admin/final-designs", finalDesign);
 routes.use("/admin/manufacturer", manufacturer);
+routes.use("/admin/items", item);
 
 // Public routes
 routes.use("/data", calculation);

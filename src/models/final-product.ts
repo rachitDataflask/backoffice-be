@@ -6,7 +6,7 @@ export interface IFinalProduct {
   product_sub_service_id: mongoose.Types.ObjectId;
   product_id: mongoose.Types.ObjectId;
   manufacturer_id: mongoose.Types.ObjectId;
-  action_data: Record<string, any>;
+  product_data: Record<string, any>;
 }
 
 // BuildingCalculation Document Interface
@@ -15,7 +15,7 @@ interface FinalProductDoc extends mongoose.Document {
   product_sub_service_id: mongoose.Types.ObjectId;
   product_id: mongoose.Types.ObjectId;
   manufacturer_id: mongoose.Types.ObjectId;
-  action_data: Record<string, any>;
+  product_data: Record<string, any>;
 }
 
 // BuildingCalculation Schema
@@ -41,7 +41,7 @@ const finalProductSchema = new mongoose.Schema<IFinalProduct>(
       ref: "Manufacturer",
       required: true,
     },
-    action_data: {
+    product_data: {
       type: Map,
       of: Schema.Types.Mixed,
       required: true,
