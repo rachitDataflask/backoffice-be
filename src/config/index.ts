@@ -12,9 +12,7 @@ const config = {
   prefix: process.env.API_PREFIX || "api",
   // databaseUri: process.env.MONGODB_URI || 'mongodb://admin:designdrafter@10.160.0.6:27017/manas'
   // databaseUri: process.env.MONGODB_URI || "mongodb://localhost:27017",
-  databaseUri:
-    process.env.MONGODB_URI ||
-    "mongodb://admin:designdrafter@34.47.138.240:27017/manas",
+  databaseUri: process.env.MONGODB_URI || "mongodb://localhost:27017/",
 };
 
-export default config;
+export default config;
