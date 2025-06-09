@@ -10,11 +10,7 @@ import ManufacturerController from "../../controllers/admin/ManufacturerControll
 const router = Router();
 
 // Get all products
-router.get(
-  "/",
-  [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])],
-  asyncHandler(ManufacturerController.listAll)
-);
+router.get("/", asyncHandler(ManufacturerController.listAll));
 
 // Get one product
 router.get(

@@ -10,11 +10,7 @@ import ProductSubServiceController from "../../controllers/admin/ProductSubServi
 const router = Router();
 
 // Get all services
-router.get(
-  "/",
-  [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])],
-  asyncHandler(ProductSubServiceController.listAll)
-);
+router.get("/", asyncHandler(ProductSubServiceController.listAll));
 
 // Get one service
 router.get(

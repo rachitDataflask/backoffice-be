@@ -10,11 +10,7 @@ import { checkRole } from "../../middleware/checkRole";
 const router = Router();
 
 // Get all Items
-router.get(
-  "/",
-  [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])],
-  asyncHandler(ItemController.listAll)
-);
+router.get("/", asyncHandler(ItemController.listAll));
 
 // Get one item
 router.get(

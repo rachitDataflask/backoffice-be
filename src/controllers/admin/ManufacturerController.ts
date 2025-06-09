@@ -8,28 +8,53 @@ import { IManufacturer, Manufacturer } from "../../models/manufacturer";
 
 class ManufacturerController {
   static listAll = async (req: Request, res: Response, next: NextFunction) => {
-    // Get the Product Sub Service ID from the url
-    const { product_sub_service_id } = req.query; // Access query parameter
+    const { product_sub_service_id } = req.query;
     let manufacturer = [];
 
-    if (product_sub_service_id) {
-      // Execute the query with product_sub_service_id
-      manufacturer = await Manufacturer.find({
-        product_sub_service_id,
-      }).populate("product_sub_service_id");
-    } else {
-      // Execute the query
-      manufacturer = await Manufacturer.find().populate(
-        "product_sub_service_id"
-      );
-    }
+    // if (product_sub_service_id) {
+    //   manufacturer = await Manufacturer.find({
+    //     product_sub_service_id,
+    //   }).populate("product_sub_service_id");
+    // } else {
+    //   manufacturer = await Manufacturer.find().populate(
+    //     "product_sub_service_id"
+    //   );
+    // }
 
-    // Send the product object
-    res.send({
-      status: ResponseCodes.MANUFACTURER_LIST.code,
-      message: ResponseCodes.MANUFACTURER_LIST.message,
-      data: manufacturer,
-    });
+    // res.send({
+    //   status: ResponseCodes.MANUFACTURER_LIST.code,
+    //   message: ResponseCodes.MANUFACTURER_LIST.message,
+    //   data: manufacturer,
+    // });
+
+    try {
+      if (product_sub_service_id) {
+        manufacturer = await Manufacturer.find({
+          product_sub_service_id,
+        }).populate({
+          path: "product_sub_service_id",
+          populate: {
+            path: "service_id",
+            model: "Service",
+          },
+        });
+      } else {
+        manufacturer = await Manufacturer.find().populate({
+          path: "product_sub_service_id",
+          populate: {
+            path: "service_id",
+          },
+        });
+      }
+
+      res.send({
+        status: ResponseCodes.PRODUCT_LIST.code,
+        message: ResponseCodes.PRODUCT_LIST.message,
+        data: manufacturer,
+      });
+    } catch (err) {
+      next(err);
+    }
   };
 
   static getOneById = async (

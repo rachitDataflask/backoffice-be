@@ -2,7 +2,6 @@ import mongoose, { Schema } from "mongoose";
 
 // BuildingCalculation Interface
 export interface IFinalItem {
-  location_id: mongoose.Types.ObjectId;
   building_id: mongoose.Types.ObjectId;
   service_id: mongoose.Types.ObjectId;
   sub_service_id: mongoose.Types.ObjectId;
@@ -12,7 +11,6 @@ export interface IFinalItem {
 
 // BuildingCalculation Document Interface
 interface FinalItemDoc extends mongoose.Document {
-  location_id: mongoose.Types.ObjectId;
   building_id: mongoose.Types.ObjectId;
   service_id: mongoose.Types.ObjectId;
   sub_service_id: mongoose.Types.ObjectId;
@@ -23,11 +21,6 @@ interface FinalItemDoc extends mongoose.Document {
 // BuildingCalculation Schema
 const finalItemSchema = new mongoose.Schema<IFinalItem>(
   {
-    location_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Location",
-      required: true,
-    },
     building_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Building",
