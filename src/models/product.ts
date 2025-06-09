@@ -74,7 +74,7 @@ import mongoose from "mongoose";
 export interface IProduct {
   name: string;
   capacity: number;
-  unit: string; // ✅ New field added here
+  unit: string;
   product_sub_service_id: mongoose.Types.ObjectId;
 }
 
@@ -82,7 +82,7 @@ export interface IProduct {
 interface ProductDoc extends mongoose.Document {
   name: string;
   capacity: number;
-  unit: string; // ✅ Also here
+  unit: string;
   product_sub_service_id: mongoose.Types.ObjectId;
 }
 

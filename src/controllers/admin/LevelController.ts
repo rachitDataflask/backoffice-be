@@ -1,119 +1,143 @@
-import { NextFunction, Request, Response } from 'express';
-import { Error } from 'mongoose';
-import { ClientError } from '../../exceptions/clientError';
-import { NotFoundError } from '../../exceptions/notFoundError';
-import { Level, ILevel } from '../../models/level';
-import { processErrors } from '../../utils/errorProcessing';
-import { ResponseCodes } from '../../utils/constants';
+import { NextFunction, Request, Response } from "express";
+import { Error } from "mongoose";
+import { ClientError } from "../../exceptions/clientError";
+import { NotFoundError } from "../../exceptions/notFoundError";
+import { Level, ILevel } from "../../models/level";
+import { processErrors } from "../../utils/errorProcessing";
+import { ResponseCodes } from "../../utils/constants";
 
 class LevelController {
-    static listAll = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the Sub Building ID from the url
-        const { sub_building_id } = req.query; // Access query parameter
-        let levels = []
+  static listAll = async (req: Request, res: Response, next: NextFunction) => {
+    const { sub_building_id } = req.query;
+    let levels = [];
 
-        if (sub_building_id) {
-            // Execute the query with sub_building_id
-            levels = await Level.find({ sub_building_id });
-        } else {
-            // Execute the query
-            levels = await Level.find();
-        }
-
-        // Send the levels object
-        res.send({
-            status: ResponseCodes.LEVEL_LIST.code,
-            message: ResponseCodes.LEVEL_LIST.message,
-            data: levels
+    try {
+      if (sub_building_id) {
+        levels = await Level.find({ sub_building_id }).populate({
+          path: "sub_building_id",
+          populate: {
+            path: "building_id",
+            model: "Building",
+          },
         });
-    };
-
-    static getOneById = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const id: string = req.params.id;
-
-        // Mongoose automatically casts the id to ObjectID
-        const level = await Level.findById(id);
-        if (!level) throw new NotFoundError(`Level with ID ${id} not found`);
-
-        res.send({
-            status: ResponseCodes.LEVEL_DETAILS.code,
-            message: ResponseCodes.LEVEL_DETAILS.message,
-            data: level?.toJSON()
+      } else {
+        levels = await Level.find().populate({
+          path: "sub_building_id",
+          populate: {
+            path: "building_id",
+            model: "Building",
+          },
         });
-    };
+      }
 
-    static newLevel = async (req: Request, res: Response, next: NextFunction) => {
-        // Get parameters from the body
-        const { sub_building_id, name, description } = req.body;
-        let level;
+      res.send({
+        status: ResponseCodes.PRODUCT_LIST.code,
+        message: ResponseCodes.PRODUCT_LIST.message,
+        data: levels,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 
-        try {
-            level = Level.build({ sub_building_id, name, description } as ILevel);
+  static getOneById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Get the ID from the url
+    const id: string = req.params.id;
 
-            // Save the level
-            await level.save();
-        } catch (e: any) {
-            console.error(e);
-            const error = e as Error.ValidationError;
-            throw new ClientError(processErrors(error));
-        }
+    // Mongoose automatically casts the id to ObjectID
+    const level = await Level.findById(id);
+    if (!level) throw new NotFoundError(`Level with ID ${id} not found`);
 
-        // If all ok, send response
-        res.send({
-            status: ResponseCodes.LEVEL_CREATED.code,
-            message: ResponseCodes.LEVEL_CREATED.message,
-            data: level.toJSON()
-        });
-    };
+    res.send({
+      status: ResponseCodes.LEVEL_DETAILS.code,
+      message: ResponseCodes.LEVEL_DETAILS.message,
+      data: level?.toJSON(),
+    });
+  };
 
-    static editLevel = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const id = req.params.id;
+  static newLevel = async (req: Request, res: Response, next: NextFunction) => {
+    // Get parameters from the body
+    const { sub_building_id, name, description } = req.body;
+    let level;
 
-        // Get values from the body
-        const { sub_building_id, name, description } = req.body;
+    try {
+      level = Level.build({ sub_building_id, name, description } as ILevel);
 
-        // Mongoose automatically casts the id to ObjectID
-        const level = await Level.findById(id);
-        if (!level) throw new NotFoundError(`Level with ID ${id} not found`);
+      // Save the level
+      await level.save();
+    } catch (e: any) {
+      console.error(e);
+      const error = e as Error.ValidationError;
+      throw new ClientError(processErrors(error));
+    }
 
-        // Edit the properties
-        level.sub_building_id = sub_building_id
-        level.name = name
-        level.description = description
+    // If all ok, send response
+    res.send({
+      status: ResponseCodes.LEVEL_CREATED.code,
+      message: ResponseCodes.LEVEL_CREATED.message,
+      data: level.toJSON(),
+    });
+  };
 
-        // Save and catch all validation errors
-        try {
-            await level.save();
-        } catch (e) {
-            const error = e as Error.ValidationError;
-            throw new ClientError(processErrors(error));
-        }
+  static editLevel = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Get the ID from the url
+    const id = req.params.id;
 
-        res.send({
-            status: ResponseCodes.LEVEL_UPDATED.code,
-            message: ResponseCodes.LEVEL_UPDATED.message,
-            data: level.toJSON()
-        });
-    };
+    // Get values from the body
+    const { sub_building_id, name, description } = req.body;
 
-    static deleteLevel = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const id = req.params.id;
+    // Mongoose automatically casts the id to ObjectID
+    const level = await Level.findById(id);
+    if (!level) throw new NotFoundError(`Level with ID ${id} not found`);
 
-        // Mongoose automatically casts the id to ObjectID
-        const level = await Level.findById(id);
-        if (!level) throw new NotFoundError(`Level with ID ${id} not found`);
+    // Edit the properties
+    level.sub_building_id = sub_building_id;
+    level.name = name;
+    level.description = description;
 
-        await level.delete();
+    // Save and catch all validation errors
+    try {
+      await level.save();
+    } catch (e) {
+      const error = e as Error.ValidationError;
+      throw new ClientError(processErrors(error));
+    }
 
-        // After all send response
-        res.send({
-            status: ResponseCodes.LEVEL_DELETED.code,
-            message: ResponseCodes.LEVEL_DELETED.message
-        });
-    };
+    res.send({
+      status: ResponseCodes.LEVEL_UPDATED.code,
+      message: ResponseCodes.LEVEL_UPDATED.message,
+      data: level.toJSON(),
+    });
+  };
+
+  static deleteLevel = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Get the ID from the url
+    const id = req.params.id;
+
+    // Mongoose automatically casts the id to ObjectID
+    const level = await Level.findById(id);
+    if (!level) throw new NotFoundError(`Level with ID ${id} not found`);
+
+    await level.delete();
+
+    // After all send response
+    res.send({
+      status: ResponseCodes.LEVEL_DELETED.code,
+      message: ResponseCodes.LEVEL_DELETED.message,
+    });
+  };
 }
 
 export default LevelController;

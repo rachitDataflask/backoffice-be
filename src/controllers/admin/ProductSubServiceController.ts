@@ -12,19 +12,20 @@ import {
 class ProductSubServiceController {
   static listAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Get the Service ID from the url
-      const { service_id } = req.query; // Access query parameter
+      const { service_id } = req.query;
       let productSubServices = [];
 
       if (service_id) {
-        // Execute the query with service_id
-        productSubServices = await ProductSubService.find({ service_id });
+        productSubServices = await ProductSubService.find({
+          service_id,
+        }).populate("service_id", "name");
       } else {
-        // Execute the query
-        productSubServices = await ProductSubService.find();
+        productSubServices = await ProductSubService.find().populate(
+          "service_id",
+          "name"
+        );
       }
 
-      // Send the productSubServices object
       res.send({
         status: ResponseCodes.PRODUCT_SUB_SERVICE_LIST.code,
         message: ResponseCodes.PRODUCT_SUB_SERVICE_LIST.message,

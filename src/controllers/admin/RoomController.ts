@@ -1,119 +1,157 @@
-import { NextFunction, Request, Response } from 'express';
-import { Error } from 'mongoose';
-import { ClientError } from '../../exceptions/clientError';
-import { NotFoundError } from '../../exceptions/notFoundError';
-import { Room, IRoom } from '../../models/room';
-import { processErrors } from '../../utils/errorProcessing';
-import { ResponseCodes } from '../../utils/constants';
+import { NextFunction, Request, Response } from "express";
+import { Error } from "mongoose";
+import { ClientError } from "../../exceptions/clientError";
+import { NotFoundError } from "../../exceptions/notFoundError";
+import { Room, IRoom } from "../../models/room";
+import { processErrors } from "../../utils/errorProcessing";
+import { ResponseCodes } from "../../utils/constants";
 
 class RoomController {
-    static listAll = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the Level ID from the url
-        const { level_id } = req.query; // Access query parameter
-        let rooms = []
+  static listAll = async (req: Request, res: Response, next: NextFunction) => {
+    const { level_id } = req.query;
+    let rooms = [];
 
-        if (level_id) {
-            // Execute the query with level_id
-            rooms = await Room.find({ level_id });
-        } else {
-            // Execute the query
-            rooms = await Room.find();
-        }
+    // if (level_id) {
+    //   rooms = await Room.find({ level_id });
+    // } else {
+    //   rooms = await Room.find();
+    // }
 
-        // Send the rooms object
-        res.send({
-            status: ResponseCodes.ROOM_LIST.code,
-            message: ResponseCodes.ROOM_LIST.message,
-            data: rooms
+    // res.send({
+    //   status: ResponseCodes.ROOM_LIST.code,
+    //   message: ResponseCodes.ROOM_LIST.message,
+    //   data: rooms,
+    // });
+
+    try {
+      if (level_id) {
+        rooms = await Room.find({ level_id }).populate({
+          path: "level_id",
+          populate: {
+            path: "sub_building_id",
+            populate: {
+              path: "building_id",
+              select: "type",
+            },
+          },
         });
-    };
-
-    static getOneById = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const id: string = req.params.id;
-
-        // Mongoose automatically casts the id to ObjectID
-        const room = await Room.findById(id);
-        if (!room) throw new NotFoundError(`Room with ID ${id} not found`);
-
-        res.send({
-            status: ResponseCodes.ROOM_DETAILS.code,
-            message: ResponseCodes.ROOM_DETAILS.message,
-            data: room?.toJSON()
+      } else {
+        rooms = await Room.find().populate({
+          path: "level_id",
+          populate: {
+            path: "sub_building_id",
+            populate: {
+              path: "building_id",
+              select: "type",
+            },
+          },
         });
-    };
+      }
 
-    static newRoom = async (req: Request, res: Response, next: NextFunction) => {
-        // Get parameters from the body
-        const { level_id, name, description } = req.body;
-        let room;
+      res.send({
+        status: ResponseCodes.PRODUCT_LIST.code,
+        message: ResponseCodes.PRODUCT_LIST.message,
+        data: rooms,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 
-        try {
-            room = Room.build({ level_id, name, description } as IRoom);
+  static getOneById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Get the ID from the url
+    const id: string = req.params.id;
 
-            // Save the room
-            await room.save();
-        } catch (e: any) {
-            console.error(e);
-            const error = e as Error.ValidationError;
-            throw new ClientError(processErrors(error));
-        }
+    // Mongoose automatically casts the id to ObjectID
+    const room = await Room.findById(id);
+    if (!room) throw new NotFoundError(`Room with ID ${id} not found`);
 
-        // If all ok, send response
-        res.send({
-            status: ResponseCodes.ROOM_CREATED.code,
-            message: ResponseCodes.ROOM_CREATED.message,
-            data: room.toJSON()
-        });
-    };
+    res.send({
+      status: ResponseCodes.ROOM_DETAILS.code,
+      message: ResponseCodes.ROOM_DETAILS.message,
+      data: room?.toJSON(),
+    });
+  };
 
-    static editRoom = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const id = req.params.id;
+  static newRoom = async (req: Request, res: Response, next: NextFunction) => {
+    // Get parameters from the body
+    const { level_id, name, description } = req.body;
+    let room;
 
-        // Get values from the body
-        const { level_id, name, description } = req.body;
+    try {
+      room = Room.build({ level_id, name, description } as IRoom);
 
-        // Mongoose automatically casts the id to ObjectID
-        const room = await Room.findById(id);
-        if (!room) throw new NotFoundError(`Room with ID ${id} not found`);
+      // Save the room
+      await room.save();
+    } catch (e: any) {
+      console.error(e);
+      const error = e as Error.ValidationError;
+      throw new ClientError(processErrors(error));
+    }
 
-        // Edit the properties
-        room.level_id = level_id
-        room.name = name
-        room.description = description
+    // If all ok, send response
+    res.send({
+      status: ResponseCodes.ROOM_CREATED.code,
+      message: ResponseCodes.ROOM_CREATED.message,
+      data: room.toJSON(),
+    });
+  };
 
-        // Save and catch all validation errors
-        try {
-            await room.save();
-        } catch (e) {
-            const error = e as Error.ValidationError;
-            throw new ClientError(processErrors(error));
-        }
+  static editRoom = async (req: Request, res: Response, next: NextFunction) => {
+    // Get the ID from the url
+    const id = req.params.id;
 
-        res.send({
-            status: ResponseCodes.ROOM_UPDATED.code,
-            message: ResponseCodes.ROOM_UPDATED.message,
-            data: room.toJSON()
-        });
-    };
+    // Get values from the body
+    const { level_id, name, description } = req.body;
 
-    static deleteRoom = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const id = req.params.id;
+    // Mongoose automatically casts the id to ObjectID
+    const room = await Room.findById(id);
+    if (!room) throw new NotFoundError(`Room with ID ${id} not found`);
 
-        // Mongoose automatically casts the id to ObjectID
-        const room = await Room.findById(id);
-        if (!room) throw new NotFoundError(`Room with ID ${id} not found`);
+    // Edit the properties
+    room.level_id = level_id;
+    room.name = name;
+    room.description = description;
 
-        await room.delete();
+    // Save and catch all validation errors
+    try {
+      await room.save();
+    } catch (e) {
+      const error = e as Error.ValidationError;
+      throw new ClientError(processErrors(error));
+    }
 
-        // After all send response
-        res.send({
-            status: ResponseCodes.ROOM_DELETED.code,
-            message: ResponseCodes.ROOM_DELETED.message
-        });
-    };
+    res.send({
+      status: ResponseCodes.ROOM_UPDATED.code,
+      message: ResponseCodes.ROOM_UPDATED.message,
+      data: room.toJSON(),
+    });
+  };
+
+  static deleteRoom = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Get the ID from the url
+    const id = req.params.id;
+
+    // Mongoose automatically casts the id to ObjectID
+    const room = await Room.findById(id);
+    if (!room) throw new NotFoundError(`Room with ID ${id} not found`);
+
+    await room.delete();
+
+    // After all send response
+    res.send({
+      status: ResponseCodes.ROOM_DELETED.code,
+      message: ResponseCodes.ROOM_DELETED.message,
+    });
+  };
 }
 
 export default RoomController;

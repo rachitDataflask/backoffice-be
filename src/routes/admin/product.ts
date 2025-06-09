@@ -10,11 +10,7 @@ import { checkRole } from "../../middleware/checkRole";
 const router = Router();
 
 // Get all products
-router.get(
-  "/",
-  [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])],
-  asyncHandler(ProductController.listAll)
-);
+router.get("/", asyncHandler(ProductController.listAll));
 
 // Get one product
 router.get(

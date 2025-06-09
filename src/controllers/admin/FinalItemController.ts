@@ -13,18 +13,11 @@ class FinalItemController {
     next: NextFunction
   ) => {
     // Get parameters from the body
-    const {
-      location_id,
-      building_id,
-      service_id,
-      sub_service_id,
-      item_id,
-      item_data,
-    } = req.body;
+    const { building_id, service_id, sub_service_id, item_id, item_data } =
+      req.body;
     let finalItem;
     try {
       finalItem = await FinalItem.build({
-        location_id,
         building_id,
         service_id,
         sub_service_id,

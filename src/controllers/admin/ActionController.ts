@@ -1,120 +1,152 @@
-import { NextFunction, Request, Response } from 'express';
-import { Error } from 'mongoose';
-import { ClientError } from '../../exceptions/clientError';
-import { NotFoundError } from '../../exceptions/notFoundError';
-import { Action, IAction } from '../../models/action';
-import { processErrors } from '../../utils/errorProcessing';
-import { ResponseCodes } from '../../utils/constants';
+import { NextFunction, Request, Response } from "express";
+import { Error } from "mongoose";
+import { ClientError } from "../../exceptions/clientError";
+import { NotFoundError } from "../../exceptions/notFoundError";
+import { Action, IAction } from "../../models/action";
+import { processErrors } from "../../utils/errorProcessing";
+import { ResponseCodes } from "../../utils/constants";
 
 class ActionController {
-    static listAll = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the Sub Service ID from the url
-        const { sub_service_id } = req.query; // Access query parameter
-        let actions = []
+  static listAll = async (req: Request, res: Response, next: NextFunction) => {
+    const { sub_service_id } = req.query;
+    let actions = [];
 
-        if (sub_service_id) {
-            // Execute the query with sub_service_id
-            actions = await Action.find({ sub_service_id }).populate('sub_service_id');
-        } else {
-            // Execute the query
-            actions = await Action.find().populate('sub_service_id');
-        }
-
-        // Send the actions object
-        res.send({
-            status: ResponseCodes.ACTION_LIST.code,
-            message: ResponseCodes.ACTION_LIST.message,
-            data: actions
+    try {
+      if (sub_service_id) {
+        actions = await Action.find({ sub_service_id }).populate({
+          path: "sub_service_id",
+          populate: {
+            path: "service_id",
+            model: "Service",
+          },
         });
-    };
-
-    static getOneById = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const id: string = req.params.id;
-
-        // Mongoose automatically casts the id to ObjectID
-        const action = await Action.findById(id);
-        if (!action) throw new NotFoundError(`Action with ID ${id} not found`);
-
-        res.send({
-            status: ResponseCodes.ACTION_DETAILS.code,
-            message: ResponseCodes.ACTION_DETAILS.message,
-            data: action?.toJSON()
+      } else {
+        actions = await Action.find().populate({
+          path: "sub_service_id",
+          populate: {
+            path: "service_id",
+          },
         });
-    };
+      }
 
-    static newAction = async (req: Request, res: Response, next: NextFunction) => {
-        // Get parameters from the body
-        const { sub_service_id, name, description, calculation_type } = req.body;
-        let action;
+      res.send({
+        status: ResponseCodes.PRODUCT_LIST.code,
+        message: ResponseCodes.PRODUCT_LIST.message,
+        data: actions,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 
-        try {
-            action = Action.build({ sub_service_id, name, description, calculation_type } as IAction);
+  static getOneById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Get the ID from the url
+    const id: string = req.params.id;
 
-            // Save the action
-            await action.save();
-        } catch (e: any) {
-            console.error(e);
-            const error = e as Error.ValidationError;
-            throw new ClientError(processErrors(error));
-        }
+    // Mongoose automatically casts the id to ObjectID
+    const action = await Action.findById(id);
+    if (!action) throw new NotFoundError(`Action with ID ${id} not found`);
 
-        // If all ok, send response
-        res.send({
-            status: ResponseCodes.ACTION_CREATED.code,
-            message: ResponseCodes.ACTION_CREATED.message,
-            data: action.toJSON()
-        });
-    };
+    res.send({
+      status: ResponseCodes.ACTION_DETAILS.code,
+      message: ResponseCodes.ACTION_DETAILS.message,
+      data: action?.toJSON(),
+    });
+  };
 
-    static editAction = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const id = req.params.id;
+  static newAction = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Get parameters from the body
+    const { sub_service_id, name, description, calculation_type } = req.body;
+    let action;
 
-        // Get values from the body
-        const { sub_service_id, name, description, calculation_type } = req.body;
+    try {
+      action = Action.build({
+        sub_service_id,
+        name,
+        description,
+        calculation_type,
+      } as IAction);
 
-        // Mongoose automatically casts the id to ObjectID
-        const action = await Action.findById(id);
-        if (!action) throw new NotFoundError(`Action with ID ${id} not found`);
+      // Save the action
+      await action.save();
+    } catch (e: any) {
+      console.error(e);
+      const error = e as Error.ValidationError;
+      throw new ClientError(processErrors(error));
+    }
 
-        // Edit the properties
-        action.sub_service_id = sub_service_id
-        action.name = name
-        action.description = description
-        action.calculation_type = calculation_type
+    // If all ok, send response
+    res.send({
+      status: ResponseCodes.ACTION_CREATED.code,
+      message: ResponseCodes.ACTION_CREATED.message,
+      data: action.toJSON(),
+    });
+  };
 
-        // Save and catch all validation errors
-        try {
-            await action.save();
-        } catch (e) {
-            const error = e as Error.ValidationError;
-            throw new ClientError(processErrors(error));
-        }
+  static editAction = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Get the ID from the url
+    const id = req.params.id;
 
-        res.send({
-            status: ResponseCodes.ACTION_UPDATED.code,
-            message: ResponseCodes.ACTION_UPDATED.message,
-            data: action.toJSON()
-        });
-    };
+    // Get values from the body
+    const { sub_service_id, name, description, calculation_type } = req.body;
 
-    static deleteAction = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const id = req.params.id;
+    // Mongoose automatically casts the id to ObjectID
+    const action = await Action.findById(id);
+    if (!action) throw new NotFoundError(`Action with ID ${id} not found`);
 
-        // Mongoose automatically casts the id to ObjectID
-        const action = await Action.findById(id);
-        if (!action) throw new NotFoundError(`Action with ID ${id} not found`);
+    // Edit the properties
+    action.sub_service_id = sub_service_id;
+    action.name = name;
+    action.description = description;
+    action.calculation_type = calculation_type;
 
-        await action.delete();
+    // Save and catch all validation errors
+    try {
+      await action.save();
+    } catch (e) {
+      const error = e as Error.ValidationError;
+      throw new ClientError(processErrors(error));
+    }
 
-        // After all send response
-        res.send({
-            status: ResponseCodes.ACTION_DELETED.code,
-            message: ResponseCodes.ACTION_DELETED.message
-        });
-    };
+    res.send({
+      status: ResponseCodes.ACTION_UPDATED.code,
+      message: ResponseCodes.ACTION_UPDATED.message,
+      data: action.toJSON(),
+    });
+  };
+
+  static deleteAction = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Get the ID from the url
+    const id = req.params.id;
+
+    // Mongoose automatically casts the id to ObjectID
+    const action = await Action.findById(id);
+    if (!action) throw new NotFoundError(`Action with ID ${id} not found`);
+
+    await action.delete();
+
+    // After all send response
+    res.send({
+      status: ResponseCodes.ACTION_DELETED.code,
+      message: ResponseCodes.ACTION_DELETED.message,
+    });
+  };
 }
 
 export default ActionController;

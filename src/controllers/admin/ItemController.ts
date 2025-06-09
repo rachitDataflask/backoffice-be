@@ -8,26 +8,49 @@ import { IItem, Item } from "../../models/item";
 
 class ItemController {
   static listAll = async (req: Request, res: Response, next: NextFunction) => {
-    // Get the Item Sub Service ID from the url
-    const { sub_service_id } = req.query; // Access query parameter
+    const { sub_service_id } = req.query;
     let items = [];
 
-    if (sub_service_id) {
-      // Execute the query with sub_service_id
-      items = await Item.find({ sub_service_id }).populate(
-        "sub_service_id"
-      );
-    } else {
-      // Execute the query
-      items = await Item.find().populate("sub_service_id");
-    }
+    // if (sub_service_id) {
+    //   items = await Item.find({ sub_service_id }).populate(
+    //     "sub_service_id"
+    //   );
+    // } else {
+    //   items = await Item.find().populate("sub_service_id");
+    // }
 
-    // Send the item object
-    res.send({
-      status: ResponseCodes.ITEM_LIST.code,
-      message: ResponseCodes.ITEM_LIST.message,
-      data: items,
-    });
+    // res.send({
+    //   status: ResponseCodes.ITEM_LIST.code,
+    //   message: ResponseCodes.ITEM_LIST.message,
+    //   data: items,
+    // });
+
+    try {
+      if (sub_service_id) {
+        items = await Item.find({ sub_service_id }).populate({
+          path: "sub_service_id",
+          populate: {
+            path: "service_id",
+            model: "Service",
+          },
+        });
+      } else {
+        items = await Item.find().populate({
+          path: "sub_service_id",
+          populate: {
+            path: "service_id",
+          },
+        });
+      }
+
+      res.send({
+        status: ResponseCodes.PRODUCT_LIST.code,
+        message: ResponseCodes.PRODUCT_LIST.message,
+        data: items,
+      });
+    } catch (err) {
+      next(err);
+    }
   };
 
   static getOneById = async (
@@ -49,11 +72,7 @@ class ItemController {
     });
   };
 
-  static newItem = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
+  static newItem = async (req: Request, res: Response, next: NextFunction) => {
     // Get parameters from the body
     const { sub_service_id, name, description } = req.body;
     let item;
@@ -81,11 +100,7 @@ class ItemController {
     });
   };
 
-  static editItem = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
+  static editItem = async (req: Request, res: Response, next: NextFunction) => {
     // Get the ID from the url
     const id = req.params.id;
 
