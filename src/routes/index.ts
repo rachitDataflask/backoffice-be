@@ -16,6 +16,7 @@ import finalDesign from "./admin/final-design";
 import item from "./admin/item";
 import finalProduct from "./admin/final-product";
 import finalItem from "./admin/final-item";
+import vendorProduct from "./admin/vendor-product";
 
 import calculation from "./public/calculation";
 import { NotFoundError } from "../exceptions/notFoundError";
@@ -41,6 +42,7 @@ routes.use("/admin/products", product);
 routes.use("/admin/final-designs", finalDesign);
 routes.use("/admin/manufacturer", manufacturer);
 routes.use("/admin/items", item);
+routes.use("/admin/vendor-product", vendorProduct);
 
 // Public routes
 routes.use("/data", calculation);
