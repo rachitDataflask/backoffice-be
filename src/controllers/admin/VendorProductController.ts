@@ -9,8 +9,7 @@ import { IVendorProduct, VendorProduct } from "../../models/vendor-product";
 class VendorProductController {
   static listAll = async (req: Request, res: Response, next: NextFunction) => {
     const { product_sub_service_id } = req.query;
-    let vendorproducts = [];
-
+    let vendorproducts: any = [];
     try {
       if (product_sub_service_id) {
         vendorproducts = await VendorProduct.find({
@@ -22,16 +21,7 @@ class VendorProductController {
             model: "Service",
           },
         });
-      } else {
-        vendorproducts = await VendorProduct.find().populate({
-          path: "product_sub_service_id",
-          populate: {
-            path: "service_id",
-            model: "Service",
-          },
-        });
       }
-
       res.send({
         status: ResponseCodes.PRODUCT_LIST.code,
         message: ResponseCodes.PRODUCT_LIST.message,
