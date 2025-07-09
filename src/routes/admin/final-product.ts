@@ -24,6 +24,18 @@ router.post(
   asyncHandler(FinalProductController.newFinalProduct)
 );
 
+router.post(
+  "/filter",
+  [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])],
+  asyncHandler(FinalProductController.getFinalProductByFilter)
+);
+
+router.patch(
+  "/:id([0-9a-fA-F]{24})",
+  [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])],
+  asyncHandler(FinalProductController.updateFinalProduct)
+);
+
 // Edit one level
 // router.patch('/:id([0-9a-z]{24})', [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])], asyncHandler(FinalDesignController.editFinalDesign));
 

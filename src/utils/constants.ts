@@ -181,6 +181,14 @@ export const ResponseCodes = {
     code: 4016,
     message: "FInal Product created successfully",
   },
+  FINAL_PRODUCT_DETAILS: {
+    code: 4017,
+    message: "FInal Product fetched successfully",
+  },
+  FINAL_PRODUCT_UPDATED: {
+    code: 4018,
+    message: "FInal Product fetched successfully",
+  },
 
   // Item response codes
   ITEM_CREATED: { code: 5001, message: "Item created successfully" },
@@ -191,6 +199,19 @@ export const ResponseCodes = {
   },
   ITEM_UPDATED: { code: 5004, message: "Item updated successfully" },
   ITEM_DELETED: { code: 5005, message: "Item deleted successfully" },
+
+  FINAL_ITEM_CREATED: {
+    code: 6023,
+    message: "FInal Product fetched successfully",
+  },
+  FINAL_ITEM_DETAILS: {
+    code: 6022,
+    message: "FInal Product fetched successfully",
+  },
+  FINAL_ITEM_UPDATED: {
+    code: 6021,
+    message: "FInal Product fetched successfully",
+  },
 
   // Product response codes
   CALCULATION_RESULT: {

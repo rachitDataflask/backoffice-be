@@ -1,22 +1,39 @@
-import { Router } from 'express';
-import FinalDesignController from '../../controllers/admin/FinalDesignController';
-import { ROLES } from '../../utils/constants';
+import { Router } from "express";
+import FinalDesignController from "../../controllers/admin/FinalDesignController";
+import { ROLES } from "../../utils/constants";
 
 // Middleware
-import { asyncHandler } from '../../middleware/asyncHandler';
-import { checkJwt } from '../../middleware/checkJwt';
-import { checkRole } from '../../middleware/checkRole';
+import { asyncHandler } from "../../middleware/asyncHandler";
+import { checkJwt } from "../../middleware/checkJwt";
+import { checkRole } from "../../middleware/checkRole";
 
 const router = Router();
 
 // Get all levels
 // router.get('/', [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])], asyncHandler(FinalDesignController.listAll));
 
+// Check if final design exists for a given filter
+router.post(
+  "/filter",
+  [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])],
+  asyncHandler(FinalDesignController.listAll)
+);
+
 // Get one level
 // router.get('/:id([0-9a-z]{24})', [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])], asyncHandler(FinalDesignController.getOneById));
 
 // Create a new level
-router.post('/', [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])], asyncHandler(FinalDesignController.newFinalDesign));
+router.post(
+  "/",
+  [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])],
+  asyncHandler(FinalDesignController.newFinalDesign)
+);
+
+router.patch(
+  "/:id([0-9a-z]{24})",
+  [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])],
+  asyncHandler(FinalDesignController.editFinalDesign)
+);
 
 // Edit one level
 // router.patch('/:id([0-9a-z]{24})', [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])], asyncHandler(FinalDesignController.editFinalDesign));

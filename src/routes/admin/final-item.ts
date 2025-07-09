@@ -22,6 +22,13 @@ router.post(
   asyncHandler(FinalItemController.newFinalItem)
 );
 
+router.post("/filter", asyncHandler(FinalItemController.getFinalItemByFilter));
+
+router.patch(
+  "/:id([0-9a-fA-F]{24})",
+  asyncHandler(FinalItemController.updateFinalItem)
+);
+
 // Edit one level
 // router.patch('/:id([0-9a-z]{24})', [checkJwt, checkRole([ROLES.USER, ROLES.ADMIN])], asyncHandler(FinalDesignController.editFinalDesign));
 

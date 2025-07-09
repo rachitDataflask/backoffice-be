@@ -40,6 +40,60 @@ class FinalProductController {
       message: ResponseCodes.FINAL_PRODUCT_CREATED.message,
     });
   };
+
+  static getFinalProductByFilter = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const { product_id, manufacturer_id, location_id } = req.body;
+
+    try {
+      const existingProduct = await FinalProduct.findOne({
+        product_id,
+        manufacturer_id,
+        location_id,
+      }).lean();
+
+      res.send({
+        status: ResponseCodes.FINAL_PRODUCT_DETAILS.code,
+        message: ResponseCodes.FINAL_PRODUCT_DETAILS.message,
+        data: existingProduct || null,
+      });
+    } catch (e: any) {
+      console.error(e);
+      const error = e as Error.ValidationError;
+      throw new ClientError(processErrors(error));
+    }
+  };
+
+  static updateFinalProduct = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const id = req.params.id;
+
+    try {
+      const updated = await FinalProduct.findByIdAndUpdate(id, req.body, {
+        new: true,
+      });
+
+      if (!updated) {
+        throw new ClientError("Final product not found");
+      }
+
+      res.send({
+        status: ResponseCodes.FINAL_PRODUCT_UPDATED.code,
+        message: ResponseCodes.FINAL_PRODUCT_UPDATED.message,
+        data: updated,
+      });
+    } catch (e: any) {
+      console.error(e);
+      const error = e as Error.ValidationError;
+      throw new ClientError(processErrors(error));
+    }
+  };
 }
 
 export default FinalProductController;
